@@ -68,7 +68,16 @@ clf = GridSearchCV(
 )
 clf.fit(X_train, y_train)
 
-# === Evaluation ===
+# Cross-Validation zur Robustheitsprüfung 
+from sklearn.model_selection import cross_val_score
+
+cv_scores = cross_val_score(clf.best_estimator_, X_train, y_train, cv=5)
+print("\nKreuzvalidierung (Decision Tree):")
+print("Einzelergebnisse (Accuracy pro Fold):", cv_scores)
+print("Durchschnittliche Accuracy:", round(cv_scores.mean(), 4))
+print("Standardabweichung:", round(cv_scores.std(), 4))
+
+# Evaluation 
 y_pred = clf.predict(X_test)
 
 # ROC-AUC nur bei binärer Klassifikation
@@ -78,7 +87,7 @@ if len(clf.classes_) == 2:
 else:
     roc_auc = "Nicht berechenbar – mehr als 2 Klassen"
 
-# === Metriken ausgeben ===
+# Metriken ausgeben
 print("Beste Parameter:", clf.best_params_)
 print("\nKlassifikationsmetriken:")
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
@@ -93,12 +102,12 @@ print(confusion_matrix(y_test, y_pred))
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 
-# === Feature Importance ===
+# Feature Importance
 feature_importance = pd.Series(clf.best_estimator_.feature_importances_, index=X_train.columns)
 print("\nTop 5 Merkmale:")
 print(feature_importance.sort_values(ascending=False).head(5))
 
-# === Visualisierung ===
+# Visualisierung
 feature_importance.sort_values(ascending=False).head(10).plot(kind='barh')
 plt.title("Top 10 wichtigsten Merkmale")
 plt.xlabel("Feature Importance")
